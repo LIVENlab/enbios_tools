@@ -29,7 +29,7 @@ classDef biosphere fill: #80d080
 ```"""
     else:
         return "\n" + class_activity_lines + f"""
-        classDef biosphere fill: #80d080
+classDef biosphere fill: #80d080
 """
 
 
