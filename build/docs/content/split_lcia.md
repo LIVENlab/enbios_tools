@@ -9,7 +9,7 @@
 ```python
 def split_characterized_inventory(
         lca: LCA,
-        activity_groups: list[list[int]],
+        technosphere_activity_groups: list[list[int]],
         make_calculations: bool = True) -> list[csr_matrix]
 ```
 
@@ -20,7 +20,7 @@ Calculations of lci and lcia are performed when they are missing and `make_calcu
 **Arguments**:
 
 - `lca`: bw LCA object
-- `activity_groups`: list of activity-groups, activities are specified by their 'id'
+- `technosphere_activity_groups`: list of (technosphere) activity-groups, activities are specified by their 'id'
 - `make_calculations`: make lci and lcia calculations if the corresponding matrices are missing
 
 **Returns**:

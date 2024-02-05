@@ -1,0 +1,4 @@
+name,code,unit,type
+product,product,unit,process
+energy,energy,MW,process
+co2,co2,kg,process

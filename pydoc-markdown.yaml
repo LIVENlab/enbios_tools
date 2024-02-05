@@ -1,34 +1,38 @@
 loaders:
-- type: python
-  search_path: [./bw_tools]
-  modules: [setup_project, find_ecoinvent, split_lcia, find_activities, regionalization, mermaid_diagram]
+  - type: python
+    search_path: [ ./bw_tools ]
+    modules: [ setup_project, find_ecoinvent, split_lcia, find_activities, regionalization, mermaid_diagram, network_build ]
 renderer:
   type: mkdocs
   mkdocs_config:
     site_name: My Project
     nav: True
   pages:
-  - title: Project setup
-    name: setup_project
-    contents:
-      - setup_project.*
-  - title: find Ecoinvent projects
-    name: ecoinvent
-    contents:
-      - find_ecoinvent.*
-  - title: Find activities
-    name: activities
-    contents:
-      - find_activities.*
-  - title: Regionalization
-    name: regionalization
-    contents:
-      - regionalization.*
-  - title: Split LCIA results
-    name: split_lcia
-    contents:
-      - split_lcia.*
-  - title: Generate Mermaid diagrams
-    name: mermaid_diagram
-    contents:
-      - mermaid_diagram.*
+    - title: Project setup
+      name: setup_project
+      contents:
+        - setup_project.*
+    - title: find Ecoinvent projects
+      name: ecoinvent
+      contents:
+        - find_ecoinvent.*
+    - title: Find activities
+      name: activities
+      contents:
+        - find_activities.*
+    - title: Regionalization
+      name: regionalization
+      contents:
+        - regionalization.*
+    - title: Split LCIA results
+      name: split_lcia
+      contents:
+        - split_lcia.*
+    - title: Generate Mermaid diagrams
+      name: mermaid_diagram
+      contents:
+        - mermaid_diagram.*
+    - title: Build bw2 network
+      name: network_build
+      contents:
+        - network_build.*
