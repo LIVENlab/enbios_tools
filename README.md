@@ -1,2 +1,2 @@
-# enbios_tools
-Some tools and helper for working with brighway
+# brightway_tools
+Some tools and helper for working with brightway
