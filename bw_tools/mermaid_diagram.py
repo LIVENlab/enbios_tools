@@ -3,9 +3,11 @@ Create a mermaid diagram (https://mermaid.js.org/) from activity relations.
 Output is the insert
 Diagram can be rendered here: https://mermaid.live in many mardown editors, pycharm markdown (with mermaid plugin installed)
 """
+from typing import Iterable
 
-from bw2data.backends import Activity
+from bw2data.backends import Activity, ActivityDataset, ExchangeDataset
 from bw2data.backends import ExchangeDataset as Ex
+from tqdm import tqdm
 
 
 def _base_diagram_pre(for_markdown: bool) -> str:
@@ -32,6 +34,17 @@ classDef biosphere fill: #80d080
 classDef biosphere fill: #80d080
 """
 
+def slow_exchange_search( activity_keys: list[tuple[str,str]]) -> set[ExchangeDataset]:
+    all_codes = [i[1] for i in activity_keys]
+    sub_res: set[ExchangeDataset] = set()
+    for item in tqdm(activity_keys):
+        all_res:Iterable[Ex] = Ex.select().where((Ex.input_database == item[0]) & (Ex.input_code == item[1]) |
+                     (Ex.output_database == item[0]) & (Ex.output_code == item[1]))
+        for res in all_res:
+            if res.input_code == item[1] and res.output_code != item[1] and res.output_code in all_codes:
+                sub_res.add(res)
+    return sub_res
+
 
 def create_diagram(activities: list[Activity], for_markdown: bool = True) -> str:
     """
@@ -41,10 +54,10 @@ def create_diagram(activities: list[Activity], for_markdown: bool = True) -> str
     :param for_markdown: if the output should be for markdown or pure mermaid
     :return: a string, which can be written to a file
     """
-    activity_keys = [a.key for a in activities]
+    activity_keys: list[tuple[str,str]] = [a.key for a in activities]
     ks = lambda act: "_".join(act.key)
     activity_key_string_map = {
-        ks(a): a["name"]
+        ks(a): a["name"].replace("(","-").replace(")","-")
         for a in activities
     }
     if len(activity_keys) == 0:
@@ -56,7 +69,10 @@ def create_diagram(activities: list[Activity], for_markdown: bool = True) -> str
                      (Ex.output_database == item[0]) & (Ex.output_code == item[1]))
         compound_query = sub_query if compound_query is None else (compound_query | sub_query)
 
-    results = list(Ex.select().where(compound_query))
+    try:
+        results = list(Ex.select().where(compound_query))
+    except RecursionError as err:
+        results = slow_exchange_search(activity_keys)
     # print(len(results))
     included_activities = []
     result_str = _base_diagram_pre(for_markdown)
