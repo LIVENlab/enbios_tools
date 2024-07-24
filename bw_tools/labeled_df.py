@@ -4,6 +4,7 @@ from bw2calc import LCA
 from bw2calc.dictionary_manager import DictionaryManager
 from bw2data.backends import ActivityDataset
 from pandas import DataFrame
+from scipy.sparse import csr_matrix
 
 from bw_tools.split_lcia import _check_lca
 
@@ -12,6 +13,7 @@ def inventory2labeled_df(lca: LCA,
                          matrix: Literal["inventory", "characterized_inventory"] = "characterized_inventory",
                          biosphere_subset: Optional[list[str]] = None,
                          technosphere_subset: Optional[list[str]] = None,
+                         alternative_matrix: Optional[csr_matrix] = None,
                          alternative_dict_manager: Optional[DictionaryManager] = None) -> DataFrame:
     """
     Turn LCA inventory or characterized inventory matrix into a DataFrame with labels corresponding to the activity names.
@@ -23,8 +25,11 @@ def inventory2labeled_df(lca: LCA,
     :return:
     """
     _check_lca(lca)
-
-    df = DataFrame(getattr(lca, matrix).toarray())
+    if alternative_matrix:
+        matrix_ = alternative_matrix
+    else:
+        matrix_ = getattr(lca, matrix)
+    df = DataFrame(matrix_.toarray())
     if alternative_dict_manager:
         dict_manager: DictionaryManager = alternative_dict_manager
     else:

@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools"]
+
+[project]
+name = "brightway-tools"
+version = "1.0.0"
+description = "Enbios 2"
+authors = [
+    { name = "Ramin Soleymani" },
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Typing :: Typed"
+]
+
+readme = "README.md"
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.9"
+
+dependencies = {file="requirements.txt"}
+
+[project.urls]
+"Homepage" = "https://github.com/LIVENlab/enbios"
+"Bug Tracker" = "https://github.com/LIVENlab/enbios/issues"
+
+[project.optional-dependencies]
+test = [
+    "pytest==7.3.2", "Deprecated>=1.2.14"
+]
+
+
+[tool.setuptools]
+package-dir = { "enbios" = "enbios" }
+
+
+
+[tool.ruff]
+line-length = 90
+

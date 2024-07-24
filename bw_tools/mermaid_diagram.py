@@ -3,6 +3,8 @@ Create a mermaid diagram (https://mermaid.js.org/) from activity relations.
 Output is the insert
 Diagram can be rendered here: https://mermaid.live in many mardown editors, pycharm markdown (with mermaid plugin installed)
 """
+from csv import DictReader
+from pathlib import Path
 from typing import Iterable
 
 from bw2data.backends import Activity, ActivityDataset, ExchangeDataset
@@ -102,8 +104,38 @@ def create_diagram(activities: list[Activity], for_markdown: bool = True) -> str
 
 if __name__ == "__main__":
     import bw2data
+    try:
+        from bw_tools.network_build import build_network
+    except ImportError:
+        raise AssertionError("Cannot import bw_tools.network_build")
 
-    bw2data.projects.set_current("nonlinear-method-test")
-    db = bw2data.Database("db")
+    project_name, db_name = "test_network_adhoc", "xxxa"
+    try:
+        bw2data.projects.delete_project(project_name, True)
+    except ValueError:
+        pass
+
+    bw2data.projects.set_current(project_name)
+
+    db = bw2data.Database(db_name)
+    db.register()
+
+    activities = list(DictReader(Path("/home/ra/projects/enbios/test/data/test_networks/activities1.csv").open(encoding="utf-8")))
+    exchanges = list(DictReader(Path("/home/ra/projects/enbios/test/data/test_networks/exchanges1.csv").open(encoding="utf-8")))
+    build_network(db, {
+        "activities": activities,
+        "exchanges": exchanges
+    })
+
+    # try:
+    #     bw2data.projects.delete_project(project_name, True)
+    # except ValueError:
+    #     pass
+
+
+    import bw2data
+
+    bw2data.projects.set_current("test_network_adhoc")
+    db = bw2data.Database("xxxa")
     open("diagram.md", "w").write(create_diagram(list(db), False))
 

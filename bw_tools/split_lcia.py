@@ -76,8 +76,8 @@ def split_characterized_inventory(lca: LCA,
 
 
 def subset_lcia(lca: LCA,
-                technosphere_activities: Optional[list[int]],
-                biosphere_activities: Optional[list[int]],
+                technosphere_activities: Optional[list[int]] = None,
+                biosphere_activities: Optional[list[int]] = None,
                 make_calculations: bool = True) -> csr_matrix:
     _check_lca(lca, make_calculations)
     return lca.characterized_inventory[
@@ -85,23 +85,66 @@ def subset_lcia(lca: LCA,
         [lca.dicts.activity[c] for c in technosphere_activities] if technosphere_activities else slice(None)]
 
 
+def _subset_matrix(matrix: csr_matrix,
+                   dicts:DictionaryManager,
+                   col_ids: Optional[list[int]] = None,
+                   row_ids: Optional[list[int]] = None) -> csr_matrix:
+    return matrix[
+        [dicts.biosphere[c] for c in row_ids] if row_ids else slice(None),
+        [dicts.activity[c] for c in col_ids] if col_ids else slice(None)]
+
+def remove_zero_rows(matrix: csr_matrix, dicts: DictionaryManager) -> tuple[csr_matrix, DictionaryManager]:
+    activity_ids = []
+    reverse_bio_dict = dicts.biosphere.reversed
+    for row_idx, row_value in enumerate(matrix.sum(0)):
+        if row_value[0, 0] != 0.0:
+            activity_ids.append(reverse_bio_dict[row_idx])
+    subset_csr = _subset_matrix(matrix, row_ids=activity_ids)
+    subset_dicts_ = subset_dicts(lca, biosphere_activities=activity_ids)
+    return subset_csr, subset_dicts_
+
+
+def remove_zero_cols(matrix: csr_matrix, dicts: DictionaryManager) -> tuple[csr_matrix, DictionaryManager]:
+    activity_ids = []
+    reverse_bio_dict = dicts.biosphere.reversed
+    for col_idx, col_value in enumerate(matrix.sum(0)):
+        if col_value[0, 0] != 0.0:
+            activity_ids.append(reverse_bio_dict[col_idx])
+    subset_csr = _subset_matrix(matrix, dicts, col_ids=activity_ids)
+    subset_dicts_ = _subset_dicts(dicts, col_ids=activity_ids)
+    return subset_csr, subset_dicts_
+
+
+def _subset_dicts(dicts: DictionaryManager,
+                  col_ids: Optional[list[int]] = None,
+                  row_ids: Optional[list[int]] = None) -> DictionaryManager:
+    new_dicts = DictionaryManager()
+    for k in dicts:
+        setattr(new_dicts, k, getattr(dicts, k).original)
+
+    for map_name, activities in [("biosphere", row_ids),
+                                 ("activity", col_ids)]:
+        if activities:
+            map_ = getattr(new_dicts, map_name)
+            slice = list(filter(lambda i: i[1] in activities, sorted(map_.reversed.items())))
+            setattr(new_dicts, map_name, {act_id[1]: idx for idx, act_id in enumerate(slice)})
+    return new_dicts
+
 def subset_dicts(lca,
-                 technosphere_activities: list[int],
-                 biosphere_activities: list[int],
+                 technosphere_activities: Optional[list[int]] = None,
+                 biosphere_activities: Optional[list[int]] = None,
                  make_calculations: bool = True) -> DictionaryManager:
-    _check_lca(lca, make_calculations)
     new_dicts = DictionaryManager()
     for k in lca.dicts:
-        new_dicts[k] = lca.dicts[k].original
+        setattr(new_dicts, k, getattr(lca.dicts, k).original)
 
     for map_name, activities in [("biosphere", biosphere_activities),
                                  ("activity", technosphere_activities)]:
         if activities:
-            map_ = new_dicts[map_name]
-            slice = list(filter(lambda i: i[0] in activities, sorted(map_.reversed.items())))
-            new_dicts[map_name] = {act_id: idx for idx, act_id in slice}
+            map_ = getattr(new_dicts, map_name)
+            slice = list(filter(lambda i: i[1] in activities, sorted(map_.reversed.items())))
+            setattr(new_dicts, map_name, {act_id[1]: idx for idx, act_id in enumerate(slice)})
     return new_dicts
-
 
 if __name__ == "__main__":
     db = set_current_get_db(ECOINVENT_391_CUTOFF)

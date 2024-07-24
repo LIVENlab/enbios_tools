@@ -1,9 +1,11 @@
 from typing import Optional, Union
 
 from bw2data.backends import SQLiteBackend, Activity
-from bw2data.backends.typos import VALID_EXCHANGE_TYPES, VALID_ACTIVITY_TYPES
+from bw2data.configuration import TypoSettings
+# from bw2data.backends.typos import VALID_EXCHANGE_TYPES, VALID_ACTIVITY_TYPES
 from pydantic import BaseModel, field_validator, Field
 
+_bw_types = TypoSettings()
 
 class ExchangeModel(BaseModel):
     input: str
@@ -14,7 +16,7 @@ class ExchangeModel(BaseModel):
     @field_validator("type", mode="before")
     @classmethod
     def validate_type(cls, type_: str):
-        if type_ not in VALID_EXCHANGE_TYPES:
+        if type_ not in _bw_types.edge_types:
             raise ValueError(f"Invalid exchange type: {type_}")
         return type_
 
@@ -32,7 +34,7 @@ class ActivityModel(BaseModel):
     @field_validator("type", mode="before")
     @classmethod
     def validate_type(cls, type_: str):
-        if type_ not in VALID_ACTIVITY_TYPES:
+        if type_ not in _bw_types.node_types:
             raise ValueError(f"Invalid activity type: {type_}")
         return type_
 
